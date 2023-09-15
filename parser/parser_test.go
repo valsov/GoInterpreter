@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/valsov/gointerpreter/ast"
@@ -123,12 +124,12 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Errorf("statement is not a *ast.ExpressionStatement. got=%T", statement)
+		t.Fatalf("program.Statements[0] is not a *ast.ExpressionStatement. got=%T", statement)
 	}
 
 	identifier, ok := statement.Expression.(*ast.Identifier)
 	if !ok {
-		t.Errorf("identifier is not a *ast.Identifier. got=%T", identifier)
+		t.Fatalf("expression is not a *ast.Identifier. got=%T", statement.Expression)
 	}
 	if identifier.Value != "foobar" {
 		t.Errorf("identifier.Value not %s. got=%s", "foobar", identifier.Value)
@@ -136,4 +137,91 @@ func TestIdentifierExpression(t *testing.T) {
 	if identifier.TokenLiteral() != "foobar" {
 		t.Errorf("identifier.TokenLiteral() not %s. got=%s", "foobar", identifier.TokenLiteral())
 	}
+}
+
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := "10;"
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements doesn't contain 1 statement. got=%d", len(program.Statements))
+	}
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not a *ast.ExpressionStatement. got=%T", statement)
+	}
+
+	intLiteral, ok := statement.Expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("expression is not a *ast.IntegerLiteral. got=%T", statement.Expression)
+	}
+	if intLiteral.Value != 10 {
+		t.Errorf("intLiteral.Value not %d. got=%d", 10, intLiteral.Value)
+	}
+	if intLiteral.TokenLiteral() != "10" {
+		t.Errorf("intLiteral.TokenLiteral() not %s. got=%s", "10", intLiteral.TokenLiteral())
+	}
+}
+
+func TestParsingPrefixExpression(t *testing.T) {
+	testCases := []struct {
+		input        string
+		operator     string
+		integerValue int64
+	}{
+		{"!5;", "!", 5},
+		{"-15;", "-", 15},
+	}
+
+	for _, tt := range testCases {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements doesn't contain 1 statement. got=%d", len(program.Statements))
+		}
+		statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not a *ast.ExpressionStatement. got=%T", statement)
+		}
+
+		preExp, ok := statement.Expression.(*ast.PrefixExpression)
+		if !ok {
+			t.Fatalf("expression is not a *ast.PrefixExpression. got=%T", statement.Expression)
+		}
+		if preExp.Operator != tt.operator {
+			t.Fatalf("preExp.Operator not '%s'. got=%s", tt.operator, preExp.Operator)
+		}
+		if !testIntegerLiteral(t, preExp.Right, tt.integerValue) {
+			return
+		}
+	}
+}
+
+func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
+	integer, ok := exp.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("exp not *ast.IntegerLiteral. got=%T", exp)
+		return false
+	}
+
+	if integer.Value != value {
+		t.Errorf("integer.Value not %d. got=%d", value, integer.Value)
+		return false
+	}
+
+	if integer.TokenLiteral() != fmt.Sprintf("%d", value) {
+		t.Errorf("integer.TokenLiteral() not %d. got=%s", value, integer.TokenLiteral())
+		return false
+	}
+
+	return true
 }

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/valsov/gointerpreter/ast"
 	"github.com/valsov/gointerpreter/lexer"
@@ -41,6 +42,9 @@ func New(l *lexer.Lexer) *Parser {
 
 	// Register expression parsers
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
 	// Init token cursors
 	p.nextToken()
@@ -140,6 +144,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFunctions[p.currentToken.Type]
 	if prefix == nil {
+		p.errors = append(p.errors, fmt.Sprintf("no prefix parse function for '%s' found", p.currentToken.Type))
 		return nil
 	}
 	return prefix()
@@ -150,6 +155,30 @@ func (p *Parser) parseIdentifier() ast.Expression {
 		Token: p.currentToken,
 		Value: p.currentToken.Literal,
 	}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	intLit := &ast.IntegerLiteral{Token: p.currentToken}
+
+	value, err := strconv.ParseInt(p.currentToken.Literal, 0, 64)
+	if err != nil {
+		p.errors = append(p.errors, fmt.Sprintf("could not parase %q as integer", p.currentToken.Literal))
+		return nil
+	}
+
+	intLit.Value = value
+	return intLit
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.currentToken,
+		Operator: p.currentToken.Literal,
+	}
+	p.nextToken()
+
+	expression.Right = p.parseExpression(PREFIX)
+	return expression
 }
 
 func (p *Parser) currentTokenIs(t token.TokenType) bool {

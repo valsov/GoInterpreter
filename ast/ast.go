@@ -109,3 +109,30 @@ func (es *ExpressionStatement) statementNode() {}
 func (es *ExpressionStatement) TokenLiteral() string {
 	return es.Token.Literal
 }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
+}
+func (il *IntegerLiteral) expresionNode() {}
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) String() string {
+	return fmt.Sprintf("(%v%v)", pe.Operator, pe.Right.String())
+}
+func (pe *PrefixExpression) expresionNode() {}
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}

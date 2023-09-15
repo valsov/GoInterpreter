@@ -8,18 +8,39 @@ import (
 	"github.com/valsov/gointerpreter/token"
 )
 
+const (
+	LOWEST        int = iota
+	EQUALS            // ==
+	LESSORGREATER     // < >
+	SUM               // +
+	PRODUCT           // *
+	PREFIX            // -x !x
+	CALL              // functionCall(x)
+)
+
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+)
+
 type Parser struct {
-	l            *lexer.Lexer
-	currentToken token.Token
-	peekToken    token.Token
-	errors       []string
+	l                    *lexer.Lexer
+	currentToken         token.Token
+	peekToken            token.Token
+	errors               []string
+	prefixParseFunctions map[token.TokenType]prefixParseFn
+	infixParseFunctions  map[token.TokenType]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:                    l,
+		errors:               []string{},
+		prefixParseFunctions: make(map[token.TokenType]prefixParseFn),
 	}
+
+	// Register expression parsers
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
 
 	// Init token cursors
 	p.nextToken()
@@ -35,6 +56,14 @@ func (p *Parser) Errors() []string {
 func (p *Parser) nextToken() {
 	p.currentToken = p.peekToken
 	p.peekToken = p.l.NextToken() // Get from lexer
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFunctions[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFunctions[tokenType] = fn
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
@@ -58,7 +87,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -78,7 +107,7 @@ func (p *Parser) parseLetStatement() ast.Statement {
 		return nil
 	}
 
-	// [...] todo
+	// todo [...]
 	for !p.currentTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -90,12 +119,37 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	statement := ast.ReturnStatement{Token: p.currentToken}
 	p.nextToken()
 
-	// [...] todo
+	// todo [...]
 	for !p.currentTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
 	return &statement
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	statement := &ast.ExpressionStatement{Token: p.currentToken}
+	statement.Expression = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return statement
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFunctions[p.currentToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	return prefix()
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{
+		Token: p.currentToken,
+		Value: p.currentToken.Literal,
+	}
 }
 
 func (p *Parser) currentTokenIs(t token.TokenType) bool {

@@ -5,6 +5,7 @@
 - Allow integers as part of a variable or function name (but only is not solely composed of int chars)
 - Support ++, --, +=, -=, *=, /=
 - Support modulo
+- Allow ternary operators
 
 ## Parser
 - indicate source line and col when reporting errors (impacts lexer)

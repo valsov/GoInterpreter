@@ -9,3 +9,4 @@
 
 ## Parser
 - indicate source line and col when reporting errors (impacts lexer)
+- Support else if(...)

@@ -48,6 +48,7 @@ type LetStatement struct {
 	Value Expression
 }
 
+func (ls *LetStatement) statementNode() {}
 func (ls *LetStatement) String() string {
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("%v %v = ", ls.TokenLiteral(), ls.Name.String()))
@@ -57,7 +58,6 @@ func (ls *LetStatement) String() string {
 	sb.WriteRune(';')
 	return sb.String()
 }
-func (ls *LetStatement) statementNode() {}
 func (ls *LetStatement) TokenLiteral() string {
 	return ls.Token.Literal
 }
@@ -67,10 +67,10 @@ type Identifier struct {
 	Value string
 }
 
+func (id *Identifier) expresionNode() {}
 func (id *Identifier) String() string {
 	return id.Value
 }
-func (id *Identifier) expresionNode() {}
 func (id *Identifier) TokenLiteral() string {
 	return id.Token.Literal
 }
@@ -80,6 +80,7 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
+func (rs *ReturnStatement) statementNode() {}
 func (rs *ReturnStatement) String() string {
 	sb := strings.Builder{}
 	sb.WriteString(rs.TokenLiteral() + " ")
@@ -89,7 +90,6 @@ func (rs *ReturnStatement) String() string {
 	sb.WriteRune(';')
 	return sb.String()
 }
-func (rs *ReturnStatement) statementNode() {}
 func (rs *ReturnStatement) TokenLiteral() string {
 	return rs.Token.Literal
 }
@@ -99,13 +99,13 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
+func (es *ExpressionStatement) statementNode() {}
 func (es *ExpressionStatement) String() string {
 	if es.Expression != nil {
 		return es.Expression.String()
 	}
 	return ""
 }
-func (es *ExpressionStatement) statementNode() {}
 func (es *ExpressionStatement) TokenLiteral() string {
 	return es.Token.Literal
 }
@@ -115,10 +115,10 @@ type IntegerLiteral struct {
 	Value int64
 }
 
+func (il *IntegerLiteral) expresionNode() {}
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
-func (il *IntegerLiteral) expresionNode() {}
 func (il *IntegerLiteral) TokenLiteral() string {
 	return il.Token.Literal
 }
@@ -129,10 +129,10 @@ type PrefixExpression struct {
 	Right    Expression
 }
 
+func (pe *PrefixExpression) expresionNode() {}
 func (pe *PrefixExpression) String() string {
 	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
 }
-func (pe *PrefixExpression) expresionNode() {}
 func (pe *PrefixExpression) TokenLiteral() string {
 	return pe.Token.Literal
 }
@@ -144,10 +144,10 @@ type InfixExpression struct {
 	Right    Expression
 }
 
+func (ie *InfixExpression) expresionNode() {}
 func (ie *InfixExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator, ie.Right.String())
 }
-func (ie *InfixExpression) expresionNode() {}
 func (ie *InfixExpression) TokenLiteral() string {
 	return ie.Token.Literal
 }
@@ -157,10 +157,10 @@ type Boolean struct {
 	Value bool
 }
 
+func (b *Boolean) expresionNode() {}
 func (b *Boolean) String() string {
 	return b.Token.Literal
 }
-func (b *Boolean) expresionNode() {}
 func (b *Boolean) TokenLiteral() string {
 	return b.Token.Literal
 }
@@ -172,6 +172,7 @@ type IfExpression struct {
 	Alternative *BlockStatement
 }
 
+func (ie *IfExpression) expresionNode() {}
 func (ie *IfExpression) String() string {
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("if %s %s", ie.Condition.String(), ie.Consequence.String()))
@@ -181,7 +182,6 @@ func (ie *IfExpression) String() string {
 	}
 	return sb.String()
 }
-func (ie *IfExpression) expresionNode() {}
 func (ie *IfExpression) TokenLiteral() string {
 	return ie.Token.Literal
 }
@@ -191,6 +191,7 @@ type BlockStatement struct {
 	Statements []Statement
 }
 
+func (bs *BlockStatement) statementNode() {}
 func (bs *BlockStatement) String() string {
 	sb := strings.Builder{}
 	for _, s := range bs.Statements {
@@ -198,7 +199,6 @@ func (bs *BlockStatement) String() string {
 	}
 	return sb.String()
 }
-func (bs *BlockStatement) statementNode() {}
 func (bs *BlockStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
@@ -209,6 +209,7 @@ type FunctionLiteral struct {
 	Body       *BlockStatement
 }
 
+func (fl *FunctionLiteral) expresionNode() {}
 func (fl *FunctionLiteral) String() string {
 	parametersStr := make([]string, len(fl.Parameters))
 	for i, s := range fl.Parameters {
@@ -216,7 +217,6 @@ func (fl *FunctionLiteral) String() string {
 	}
 	return fmt.Sprintf("%s(%s) %s", fl.TokenLiteral(), strings.Join(parametersStr, ", "), fl.Body.String())
 }
-func (fl *FunctionLiteral) expresionNode() {}
 func (fl *FunctionLiteral) TokenLiteral() string {
 	return fl.Token.Literal
 }
@@ -227,6 +227,7 @@ type CallExpression struct {
 	Arguments []Expression
 }
 
+func (ce *CallExpression) expresionNode() {}
 func (ce *CallExpression) String() string {
 	args := make([]string, len(ce.Arguments))
 	for i, arg := range ce.Arguments {
@@ -234,7 +235,6 @@ func (ce *CallExpression) String() string {
 	}
 	return fmt.Sprintf("%s(%s)", ce.Function.String(), strings.Join(args, ", "))
 }
-func (ce *CallExpression) expresionNode() {}
 func (ce *CallExpression) TokenLiteral() string {
 	return ce.Token.Literal
 }

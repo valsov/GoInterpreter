@@ -220,3 +220,21 @@ func (fl *FunctionLiteral) expresionNode() {}
 func (fl *FunctionLiteral) TokenLiteral() string {
 	return fl.Token.Literal
 }
+
+type CallExpression struct {
+	Token     token.Token // (
+	Function  Expression
+	Arguments []Expression
+}
+
+func (ce *CallExpression) String() string {
+	args := make([]string, len(ce.Arguments))
+	for i, arg := range ce.Arguments {
+		args[i] = arg.String()
+	}
+	return fmt.Sprintf("%s(%s)", ce.Function.String(), strings.Join(args, ", "))
+}
+func (ce *CallExpression) expresionNode() {}
+func (ce *CallExpression) TokenLiteral() string {
+	return ce.Token.Literal
+}

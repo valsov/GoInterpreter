@@ -202,3 +202,21 @@ func (bs *BlockStatement) statementNode() {}
 func (bs *BlockStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
+
+type FunctionLiteral struct {
+	Token      token.Token // fn
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fl *FunctionLiteral) String() string {
+	parametersStr := make([]string, len(fl.Parameters))
+	for i, s := range fl.Parameters {
+		parametersStr[i] = s.String()
+	}
+	return fmt.Sprintf("%s(%s) %s", fl.TokenLiteral(), strings.Join(parametersStr, ", "), fl.Body.String())
+}
+func (fl *FunctionLiteral) expresionNode() {}
+func (fl *FunctionLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}

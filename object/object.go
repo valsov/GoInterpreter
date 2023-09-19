@@ -1,6 +1,11 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/valsov/gointerpreter/ast"
+)
 
 const (
 	INTEGER_OBJ      = "INTEGER"
@@ -8,6 +13,7 @@ const (
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
+	FUNCTION_OBJ     = "FUNCTION"
 )
 
 type ObjectType string
@@ -49,3 +55,18 @@ type Error struct {
 
 func (e *Error) Inspect() string  { return fmt.Sprintf("ERROR: %s", e.Message) }
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
+
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (f *Function) Inspect() string {
+	parameters := []string{}
+	for _, p := range f.Parameters {
+		parameters = append(parameters, p.String())
+	}
+	return fmt.Sprintf("fn(%s) {\n%s\n}", strings.Join(parameters, ", "), f.Body.String())
+}
+func (f *Function) Type() ObjectType { return ERROR_OBJ }

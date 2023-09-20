@@ -282,3 +282,25 @@ func (ie *IndexExpression) String() string {
 func (ie *IndexExpression) TokenLiteral() string {
 	return ie.Token.Literal
 }
+
+type HashLiteral struct {
+	Token token.Token // {
+	Pairs []ExpressionPair
+}
+
+func (hl *HashLiteral) expresionNode() {}
+func (hl *HashLiteral) String() string {
+	pairs := make([]string, len(hl.Pairs))
+	for i, pair := range hl.Pairs {
+		pairs[i] = fmt.Sprintf("%s:%s", pair.Key.String(), pair.Value.String())
+		i++
+	}
+	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
+}
+func (hl *HashLiteral) TokenLiteral() string {
+	return hl.Token.Literal
+}
+
+type ExpressionPair struct {
+	Key, Value Expression
+}

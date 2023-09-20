@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+	"hash/fnv"
 	"strings"
 
 	"github.com/valsov/gointerpreter/ast"
@@ -17,7 +18,10 @@ const (
 	FUNCTION_OBJ     = "FUNCTION"
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
+	HASH_OBJ         = "HASH"
 )
+
+var hashKeyCache = map[Hashable]HashKey{}
 
 type ObjectType string
 
@@ -79,7 +83,7 @@ func (f *Function) Inspect() string {
 	}
 	return fmt.Sprintf("fn(%s) {\n%s\n}", strings.Join(parameters, ", "), f.Body.String())
 }
-func (f *Function) Type() ObjectType { return ERROR_OBJ }
+func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
 
 type BuiltinFunction func(args ...Object) Object
 
@@ -102,3 +106,70 @@ func (a *Array) Inspect() string {
 	return fmt.Sprintf("[%s]", strings.Join(elements, ", "))
 }
 func (a *Array) Type() ObjectType { return ARRAY_OBJ }
+
+type HashPair struct {
+	Key, Value Object
+}
+
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+func (h *Hash) Inspect() string {
+	pairs := make([]string, len(h.Pairs))
+	i := 0
+	for _, pair := range h.Pairs {
+		pairs[i] = fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect())
+		i++
+	}
+	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
+}
+func (h *Hash) Type() ObjectType { return HASH_OBJ }
+
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+type Hashable interface {
+	HashKey() HashKey
+}
+
+func (b *Boolean) HashKey() HashKey {
+	if hashKey, found := hashKeyCache[b]; found {
+		return hashKey
+	}
+
+	var value uint64
+	if b.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	hashKey := HashKey{Type: b.Type(), Value: value}
+	hashKeyCache[b] = hashKey
+	return hashKey
+}
+
+func (i *Integer) HashKey() HashKey {
+	if hashKey, found := hashKeyCache[i]; found {
+		return hashKey
+	}
+
+	hashKey := HashKey{Type: i.Type(), Value: uint64(i.Value)}
+	hashKeyCache[i] = hashKey
+	return hashKey
+}
+
+func (s *String) HashKey() HashKey {
+	if hashKey, found := hashKeyCache[s]; found {
+		return hashKey
+	}
+	hash := fnv.New64a()
+	hash.Write([]byte(s.Value))
+
+	hashKey := HashKey{Type: s.Type(), Value: hash.Sum64()}
+	hashKeyCache[s] = hashKey
+	return hashKey
+}

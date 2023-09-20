@@ -251,3 +251,34 @@ func (s *StringLiteral) String() string {
 func (s *StringLiteral) TokenLiteral() string {
 	return s.Token.Literal
 }
+
+type ArrayLiteral struct {
+	Token    token.Token // [
+	Elements []Expression
+}
+
+func (al *ArrayLiteral) expresionNode() {}
+func (al *ArrayLiteral) String() string {
+	elements := make([]string, len(al.Elements))
+	for i, elem := range al.Elements {
+		elements[i] = elem.String()
+	}
+	return fmt.Sprintf("[%s]", strings.Join(elements, ", "))
+}
+func (al *ArrayLiteral) TokenLiteral() string {
+	return al.Token.Literal
+}
+
+type IndexExpression struct {
+	Token token.Token // [
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expresionNode() {}
+func (ie *IndexExpression) String() string {
+	return fmt.Sprintf("(%s[%s])", ie.Left.String(), ie.Index.String())
+}
+func (ie *IndexExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}

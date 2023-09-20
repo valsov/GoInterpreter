@@ -1,6 +1,11 @@
 package lexer
 
-import "github.com/valsov/gointerpreter/token"
+import (
+	"errors"
+	"strings"
+
+	"github.com/valsov/gointerpreter/token"
+)
 
 type Lexer struct {
 	input        string
@@ -64,6 +69,15 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Type = token.EOF
 		tok.Literal = ""
+	case '"':
+		str, err := l.readString()
+		if err != nil {
+			tok.Type = token.ILLEGAL
+			tok.Literal = err.Error()
+		} else {
+			tok.Type = token.STRING
+			tok.Literal = str
+		}
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readWhile(isLetter)
@@ -113,6 +127,39 @@ func (l *Lexer) readWhile(filterFunc func(byte) bool) string {
 		l.readChar()
 	}
 	return l.input[position:l.position] // l.position is used instead of l.readPosition because we are already pointing to the next (invalid) char
+}
+
+func (l *Lexer) readString() (string, error) {
+	sb := strings.Builder{}
+	for {
+		l.readChar()
+
+		switch l.ch {
+		case 0:
+			return "", errors.New("encountered EOF before string end")
+		case '\\':
+			l.readChar()
+			switch l.ch {
+			case '\\':
+				sb.WriteByte('\\')
+			case '"':
+				sb.WriteByte('"')
+			case 't':
+				sb.WriteByte('\t')
+			case 'n':
+				sb.WriteByte('\n')
+			case 'r':
+				sb.WriteByte('\r')
+			default:
+				sb.WriteByte('\\')
+				sb.WriteByte(l.ch)
+			}
+		case '"':
+			return sb.String(), nil
+		default:
+			sb.WriteByte(l.ch)
+		}
+	}
 }
 
 func isLetter(ch byte) bool {

@@ -39,6 +39,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalBlockStatement(node, env)
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBoolean(node.Value)
 	case *ast.IfExpression:
@@ -132,6 +134,8 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	case left.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
 	case operator == "==":
 		// Compare by memory address, this works for booleans since we use the same instances TRUE & FALSE
 		return nativeBoolToBoolean(left == right)
@@ -188,6 +192,16 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
+}
+
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" {
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+
+	leftValue := left.(*object.String).Value
+	rightValue := right.(*object.String).Value
+	return &object.String{Value: leftValue + rightValue}
 }
 
 func evalIfExpression(ifExp *ast.IfExpression, env *object.Environment) object.Object {

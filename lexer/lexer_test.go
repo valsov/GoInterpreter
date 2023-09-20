@@ -26,6 +26,10 @@ func TestNewToken(t *testing.T) {
 
 	10 == 10
 	10 != 9
+	"foobar"
+	"foo bar"
+	"foo\n \"bar\""
+	"f\r\too\n \"bar\""
 	`
 
 	tests := []struct {
@@ -104,6 +108,10 @@ func TestNewToken(t *testing.T) {
 		{token.INT, "10"},
 		{token.NOT_EQ, "!="},
 		{token.INT, "9"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+		{token.STRING, "foo\n \"bar\""},
+		{token.STRING, "f\r\too\n \"bar\""},
 		{token.EOF, ""},
 	}
 

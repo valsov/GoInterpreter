@@ -15,6 +15,7 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
+	BUILTIN_OBJ      = "BUILTIN"
 )
 
 type ObjectType string
@@ -78,3 +79,12 @@ func (f *Function) Inspect() string {
 	return fmt.Sprintf("fn(%s) {\n%s\n}", strings.Join(parameters, ", "), f.Body.String())
 }
 func (f *Function) Type() ObjectType { return ERROR_OBJ }
+
+type BuiltinFunction func(args ...Object) Object
+
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (bi *Builtin) Inspect() string  { return "built-in function" }
+func (bi *Builtin) Type() ObjectType { return BUILTIN_OBJ }

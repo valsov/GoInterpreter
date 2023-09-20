@@ -1,6 +1,10 @@
 package evaluator
 
-import "github.com/valsov/gointerpreter/object"
+import (
+	"fmt"
+
+	"github.com/valsov/gointerpreter/object"
+)
 
 var builtins = map[string]*object.Builtin{
 	"len": {
@@ -93,6 +97,14 @@ var builtins = map[string]*object.Builtin{
 			newElements[length] = args[1]
 
 			return &object.Array{Elements: newElements}
+		},
+	},
+	"print": {
+		Fn: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Println(arg.Inspect())
+			}
+			return NULL
 		},
 	},
 }

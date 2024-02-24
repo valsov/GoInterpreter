@@ -1,5 +1,5 @@
 # Interpreter implemented in Go
-Study on interpreters, featuring a complete dynamically-typed language. The project is unit-tested.
+Study on interpreters, featuring a complete dynamically-typed language. This work is based on the book [Writing An Interpreter In Go, by Thorsten Ball](https://interpreterbook.com/). The project is fully unit-tested.
 
 ## Structure of the project
 - `/ast` All available data structures representing the evaluated program

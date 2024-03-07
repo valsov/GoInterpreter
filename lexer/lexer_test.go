@@ -32,13 +32,13 @@ func TestNewToken(t *testing.T) {
 	"f\r\too\n \"bar\""
 	[1, 2];
 	{"foo": "bar"}
+    let lexer = "レクサー";
 	`
 
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-
 		{token.LET, "let"},
 		{token.IDENT, "five"},
 		{token.ASSIGN, "="},
@@ -125,6 +125,11 @@ func TestNewToken(t *testing.T) {
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
+		{token.LET, "let"},
+		{token.IDENT, "lexer"},
+		{token.ASSIGN, "="},
+		{token.STRING, "レクサー"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 

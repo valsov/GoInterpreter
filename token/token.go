@@ -62,7 +62,7 @@ var keywords = map[string]TokenType{
 	"else":   ELSE,
 }
 
-func LookupIndent(input string) TokenType {
+func Lookup(input string) TokenType {
 	if tokenType, found := keywords[input]; found {
 		return tokenType
 	}

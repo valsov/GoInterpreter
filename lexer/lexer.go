@@ -87,14 +87,11 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = str
 		}
 	default:
-		if isLetter(l.ch) {
-			tok.Literal = l.readWhile(isLetter)
-			tok.Type = token.Lookup(tok.Literal)
-			// readIdentifier() already advanced read pointers, no need to call readChar() -> return early
-			return tok
-		} else if isDigit(l.ch) {
-			tok.Literal = l.readWhile(isDigit)
-			tok.Type = token.INT
+		if isLetter(l.ch) || isDigit(l.ch) {
+			literal, tokenType := l.readWhileValid()
+			tok.Literal = literal
+			tok.Type = tokenType
+			// readWhileValid() already advanced read pointers, no need to call readChar() -> return early
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
@@ -129,12 +126,29 @@ func (l *Lexer) skipWhiteSpaces() {
 	}
 }
 
-func (l *Lexer) readWhile(filterFunc func(rune) bool) string {
-	position := l.position
-	for filterFunc(l.ch) {
+func (l *Lexer) readWhileValid() (string, token.TokenType) {
+	digitsOnly := true
+	startPosition := l.position
+	for {
+		if isLetter(l.ch) {
+			digitsOnly = false
+		} else if !isDigit(l.ch) {
+			// End of valid runes
+			break
+		}
+
 		l.readChar()
 	}
-	return string(l.input[position:l.position]) // l.position is used instead of l.readPosition because we are already pointing to the next (invalid) char
+
+	literal := string(l.input[startPosition:l.position]) // l.position is used instead of l.readPosition because we are already pointing to the next (invalid) char
+
+	var tokenType token.TokenType
+	if digitsOnly {
+		tokenType = token.INT
+	} else {
+		tokenType = token.Lookup(literal)
+	}
+	return literal, tokenType
 }
 
 func (l *Lexer) readString() (string, error) {

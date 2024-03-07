@@ -9,6 +9,7 @@ import (
 func TestNewToken(t *testing.T) {
 	input := `let five = 5;
 	let ten = 10;
+	let ten10ten = 10;
 	
 	let add = fn(x, y) {
 		x + y;
@@ -46,6 +47,11 @@ func TestNewToken(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.LET, "let"},
 		{token.IDENT, "ten"},
+		{token.ASSIGN, "="},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENT, "ten10ten"},
 		{token.ASSIGN, "="},
 		{token.INT, "10"},
 		{token.SEMICOLON, ";"},

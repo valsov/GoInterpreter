@@ -23,6 +23,7 @@ const (
 	MINUS    = "-"
 	SLASH    = "/"
 	ASTERISK = "*"
+	MODULO   = "%"
 
 	// Comparison
 	LT     = "<"

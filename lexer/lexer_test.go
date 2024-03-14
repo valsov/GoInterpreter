@@ -24,7 +24,7 @@ func TestNewToken(t *testing.T) {
 	} else {
 		return false;
 	}
-
+    ternary ? 0 : 1
 	10 == 10
 	10 != 9
 	"foobar"
@@ -111,6 +111,11 @@ func TestNewToken(t *testing.T) {
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.IDENT, "ternary"},
+		{token.QMARK, "?"},
+		{token.INT, "0"},
+		{token.COLON, ":"},
+		{token.INT, "1"},
 		{token.INT, "10"},
 		{token.EQ, "=="},
 		{token.INT, "10"},

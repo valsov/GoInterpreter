@@ -18,7 +18,7 @@ Study on interpreters, featuring a complete dynamically-typed language. This wor
 ### Lexer
 - [x] Support UNICODE + UFT8 encoding instead of only ASCII. This requires switching from `byte` to `rune` reading
 - [x] Allow integers as part of a variable or function name (but only if not solely composed of int chars)
-- [ ] Support ++, --, +=, -=, *=, /=
+- [ ] Support ++, --, +=, -=, *=, /=, %=
 - [x] Support modulo
 - [ ] Allow ternary operators
 
